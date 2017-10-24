@@ -70,6 +70,9 @@ class sasl::authd::config {
     }
   }
 
+  #notify { 'SaslauthdMech': withpath => true, name => "mechanism is '${mechanism}'." }
+  #notify { 'SaslauthdThreads': withpath => true, name => "threads are '${threads}'." }
+
   case $::osfamily {
     'RedHat': {
       if size($_mech_options) > 0 {
@@ -84,8 +87,6 @@ class sasl::authd::config {
       }
 
       #notify { 'SaslauthdMechOpts': withpath => true, name => "mech options are '${mech_options}'." }
-      #notify { 'SaslauthdMech': withpath => true, name => "mechanism is '${mechanism}'." }
-      #notify { 'SaslauthdThreads': withpath => true, name => "threads are '${threads}'." }
       #notify { 'SaslauthdFlags': withpath => true, name => "flags are '${flags}'." }
 
       file { '/etc/sysconfig/saslauthd':
@@ -98,6 +99,10 @@ class sasl::authd::config {
     }
     'Debian': {
       $mech_options = $_mech_options
+      $flags = $_flags
+
+      #notify { 'SaslauthdMechOpts': withpath => true, name => "mech options are '${mech_options}'." }
+      #notify { 'SaslauthdFlags': withpath => true, name => "flags are '${flags}'." }
 
       file { '/etc/default/saslauthd':
         ensure  => file,

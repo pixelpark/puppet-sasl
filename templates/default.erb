@@ -6,4 +6,4 @@ NAME="saslauthd"
 MECHANISMS="<%= @mechanism %>"
 MECH_OPTIONS="<%= @mech_options %>"
 THREADS=<%= @threads %>
-OPTIONS="-c -m <%= @socket %>"
+OPTIONS="<%= @flags %>-m <%= @socket %>"
