@@ -83,6 +83,11 @@ class sasl::authd::config {
         default                            => strip("${_flags}${mech_options} -n ${threads}")
       }
 
+      notify { 'SaslauthdMechOpts': withpath => true, name => "mech options are '${mech_options}'." }
+      notify { 'SaslauthdMech': withpath => true, name => "mechanism is '${mechanism}'." }
+      notify { 'SaslauthdThreads': withpath => true, name => "threads are '${threads}'." }
+      notify { 'SaslauthdFlags': withpath => true, name => "flags are '${flags}'." }
+
       file { '/etc/sysconfig/saslauthd':
         ensure  => file,
         owner   => 0,
