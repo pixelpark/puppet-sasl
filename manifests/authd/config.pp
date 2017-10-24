@@ -4,6 +4,8 @@ class sasl::authd::config {
   $socket                  = $::sasl::authd::socket
   $mechanism               = $::sasl::authd::mechanism
   $threads                 = $::sasl::authd::threads
+  $caching                 = $::sasl::authd::caching
+  $combine_realm           = $::sasl::authd::combine_realm
   $ldap_conf_file          = $::sasl::authd::ldap_conf_file
   $ldap_auth_method        = $::sasl::authd::ldap_auth_method
   $ldap_bind_dn            = $::sasl::authd::ldap_bind_dn
@@ -54,6 +56,20 @@ class sasl::authd::config {
     default => '',
   }
 
+  if $caching {
+    if $combine_realm {
+      $_flags = '-c -r '
+    } else {
+      $_flags = '-c '
+    }
+  } else {
+    if $combine_realm {
+      $_flags = '-r '
+    } else {
+      $_flags = ''
+    }
+  }
+
   case $::osfamily {
     'RedHat': {
       if size($_mech_options) > 0 {
@@ -63,8 +79,8 @@ class sasl::authd::config {
       }
 
       $flags = $threads ? {
-        $::sasl::params::saslauthd_threads => $mech_options,
-        default                            => strip("${mech_options} -n ${threads}")
+        $::sasl::params::saslauthd_threads => strip("${_flags}${mech_options}"),
+        default                            => strip("${_flags}${mech_options} -n ${threads}")
       }
 
       file { '/etc/sysconfig/saslauthd':
