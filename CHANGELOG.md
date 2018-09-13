@@ -1,5 +1,12 @@
 # Change Log
 
+## [v2.0.2](https://github.com/bodgit/puppet-sasl/tree/v2.0.2) (2018-09-11)
+[Full Changelog](https://github.com/bodgit/puppet-sasl/compare/v2.0.1...v2.0.2)
+
+**Implemented enhancements:**
+
+- Allow use of 'external' mechanism in application configuration [\#13](https://github.com/bodgit/puppet-sasl/pull/13) ([cwmoller](https://github.com/cwmoller))
+
 ## [v2.0.1](https://github.com/bodgit/puppet-sasl/tree/v2.0.1) (2017-11-08)
 [Full Changelog](https://github.com/bodgit/puppet-sasl/compare/v2.0.0...v2.0.1)
 

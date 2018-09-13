@@ -10,6 +10,7 @@ if Puppet.version.to_f >= 4.4
         'login',
         'ntlm',
         'plain',
+        'external',
       ].each do |value|
         describe value.inspect do
           let(:params) {{ value: value }}
