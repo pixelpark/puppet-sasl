@@ -73,7 +73,7 @@ class sasl::authd::config {
   #notify { 'SaslauthdMech': withpath => true, name => "mechanism is '${mechanism}'." }
   #notify { 'SaslauthdThreads': withpath => true, name => "threads are '${threads}'." }
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       if size($_mech_options) > 0 {
         $mech_options = "-O ${_mech_options}"

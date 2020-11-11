@@ -18,10 +18,10 @@ class sasl (
   String                      $package_name          = $::sasl::params::package_name,
   Hash[SASL::Auxprop, String] $auxprop_packages      = $::sasl::params::auxprop_packages,
   Hash[SASL::Mech, String]    $mech_packages         = $::sasl::params::mech_packages,
-) inherits ::sasl::params {
+) inherits sasl::params {
 
-  contain ::sasl::install
-  contain ::sasl::config
+  contain sasl::install
+  contain sasl::config
 
-  Class['::sasl::install'] -> Class['::sasl::config']
+  Class['sasl::install'] -> Class['sasl::config']
 }

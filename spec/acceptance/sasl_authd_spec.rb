@@ -1,6 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'sasl::authd' do
+  # rubocop:disable ConditionalAssignment
   case fact('osfamily')
   when 'RedHat'
     package_name = 'cyrus-sasl'
@@ -15,10 +16,10 @@ describe 'sasl::authd' do
     package_name = 'sasl2-bin'
     pam_service  = 'common-auth'
   end
+  # rubocop:enable ConditionalAssignment
 
   context 'with pam mechanism' do
-
-    it 'should work with no errors' do
+    it 'works with no errors' do
       pp = <<-EOS
         group { 'test':
           ensure => present,
@@ -42,37 +43,37 @@ describe 'sasl::authd' do
         }
       EOS
 
-      apply_manifest(pp, :catch_failures => true)
-      apply_manifest(pp, :catch_changes  => true)
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes:  true)
     end
 
     describe package(package_name) do
-      it { should be_installed }
+      it { is_expected.to be_installed }
     end
 
-    describe file('/etc/sysconfig/saslauthd'), :if => fact('osfamily').eql?('RedHat') do
-      it { should be_file }
-      it { should be_mode 644 }
-      it { should be_owned_by 'root' }
-      it { should be_grouped_into 'root' }
-      its(:content) {
-        should eq <<-EOS.gsub(/^ +/, '')
+    describe file('/etc/sysconfig/saslauthd'), if: fact('osfamily').eql?('RedHat') do
+      it { is_expected.to be_file }
+      it { is_expected.to be_mode 644 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+      its(:content) do
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           # !!! Managed by Puppet !!!
 
           SOCKETDIR="#{socket}"
           MECH="pam"
           FLAGS="-n 1"
         EOS
-      }
+      end
     end
 
-    describe file('/etc/default/saslauthd'), :if => fact('osfamily').eql?('Debian') do
-      it { should be_file }
-      it { should be_mode 644 }
-      it { should be_owned_by 'root' }
-      it { should be_grouped_into 'root' }
-      its(:content) {
-        should eq <<-EOS.gsub(/^ +/, '')
+    describe file('/etc/default/saslauthd'), if: fact('osfamily').eql?('Debian') do
+      it { is_expected.to be_file }
+      it { is_expected.to be_mode 644 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+      its(:content) do
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           # !!! Managed by Puppet !!!
 
           START=yes
@@ -83,59 +84,87 @@ describe 'sasl::authd' do
           THREADS=1
           OPTIONS="-c -m /var/run/saslauthd"
         EOS
-      }
+      end
     end
 
     # Debian Squeeze doesn't support 'service saslauthd status'
-    describe service('saslauthd'), :unless => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_enabled }
-      it { should be_running }
+    describe service('saslauthd'), unless: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_enabled }
+      it { is_expected.to be_running }
     end
 
-    describe service('saslauthd'), :if => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_enabled }
+    describe service('saslauthd'), if: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_enabled }
     end
 
-    describe process('saslauthd'), :if => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_running }
+    describe process('saslauthd'), if: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_running }
     end
 
     describe command("testsaslauthd -u test -p test -s #{pam_service}") do
-      its(:stdout) { should match /^0: OK "Success."/ }
-      its(:exit_status) { should eq 0 }
+      its(:stdout) { is_expected.to match %r{^0: OK "Success."} }
+      its(:exit_status) { is_expected.to eq 0 }
     end
 
-    #describe command("testsaslauthd -u test -p invalid -s #{pam_service}") do
-    #  its(:stdout) { should match /^0: NO "authentication failed"/ }
-    #  its(:exit_status) { should eq 255 }
-    #end
+    # describe command("testsaslauthd -u test -p invalid -s #{pam_service}") do
+    #   its(:stdout) { is_expected.to match /^0: NO "authentication failed"/ }
+    #   its(:exit_status) { is_expected.to eq 255 }
+    # end
   end
 
   context 'with ldap mechanism' do
-
-    it 'should work with no errors' do
+    it 'works with no errors' do
       pp = <<-EOS
         include ::openldap
         include ::openldap::client
         class { '::openldap::server':
-          root_dn         => 'cn=Manager,dc=example,dc=com',
-          root_password   => 'secret',
-          suffix          => 'dc=example,dc=com',
-          access          => [
-            'to attrs=userPassword by self =xw by anonymous auth',
-            'to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage by users read',
+          root_dn       => 'cn=Manager,dc=example,dc=com',
+          root_password => 'secret',
+          suffix        => 'dc=example,dc=com',
+          access        => [
+            [
+              {
+                'attrs' => ['userPassword'],
+              },
+              [
+                {
+                  'who'    => ['self'],
+                  'access' => '=xw',
+                },
+                {
+                  'who'    => ['anonymous'],
+                  'access' => 'auth',
+                },
+              ],
+            ],
+            [
+              {
+                'dn' => '*',
+              },
+              [
+                {
+                  'who'    => ['dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"'],
+                  'access' => 'manage',
+                },
+                {
+                  'who'    => ['users'],
+                  'access' => 'read',
+                },
+              ],
+            ],
           ],
-          ldap_interfaces => ['#{default.ip}'],
-          local_ssf       => 256,
+          interfaces    => ['ldap://#{default.ip}/'],
+          local_ssf     => 256,
         }
         ::openldap::server::schema { 'cosine':
-          position => 1,
+          ensure => present,
         }
         ::openldap::server::schema { 'inetorgperson':
-          position => 2,
+          ensure => present,
         }
         ::openldap::server::schema { 'nis':
-          position => 3,
+          ensure  => present,
+          require => ::Openldap::Server::Schema['cosine'],
         }
 
         include ::sasl
@@ -152,41 +181,41 @@ describe 'sasl::authd' do
         }
       EOS
 
-      apply_manifest(pp, :catch_failures => true)
-      apply_manifest(pp, :catch_changes  => true)
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes:  true)
     end
 
     describe command('ldapadd -Y EXTERNAL -H ldapi:/// -f /root/example.ldif') do
-      its(:exit_status) { should eq 0 }
+      its(:exit_status) { is_expected.to eq 0 }
     end
 
     describe package(package_name) do
-      it { should be_installed }
+      it { is_expected.to be_installed }
     end
 
-    describe file('/etc/sysconfig/saslauthd'), :if => fact('osfamily').eql?('RedHat') do
-      it { should be_file }
-      it { should be_mode 644 }
-      it { should be_owned_by 'root' }
-      it { should be_grouped_into 'root' }
-      its(:content) {
-        should eq <<-EOS.gsub(/^ +/, '')
+    describe file('/etc/sysconfig/saslauthd'), if: fact('osfamily').eql?('RedHat') do
+      it { is_expected.to be_file }
+      it { is_expected.to be_mode 644 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+      its(:content) do
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           # !!! Managed by Puppet !!!
 
           SOCKETDIR="#{socket}"
           MECH="ldap"
           FLAGS="-n 1"
         EOS
-      }
+      end
     end
 
-    describe file('/etc/default/saslauthd'), :if => fact('osfamily').eql?('Debian') do
-      it { should be_file }
-      it { should be_mode 644 }
-      it { should be_owned_by 'root' }
-      it { should be_grouped_into 'root' }
-      its(:content) {
-        should eq <<-EOS.gsub(/^ +/, '')
+    describe file('/etc/default/saslauthd'), if: fact('osfamily').eql?('Debian') do
+      it { is_expected.to be_file }
+      it { is_expected.to be_mode 644 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+      its(:content) do
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           # !!! Managed by Puppet !!!
 
           START=yes
@@ -197,16 +226,16 @@ describe 'sasl::authd' do
           THREADS=1
           OPTIONS="-c -m /var/run/saslauthd"
         EOS
-      }
+      end
     end
 
     describe file('/etc/saslauthd.conf') do
-      it { should be_file }
-      it { should be_mode 644 }
-      it { should be_owned_by 'root' }
-      it { should be_grouped_into 'root' }
-      its(:content) {
-        should eq <<-EOS.gsub(/^ +/, '')
+      it { is_expected.to be_file }
+      it { is_expected.to be_mode 644 }
+      it { is_expected.to be_owned_by 'root' }
+      it { is_expected.to be_grouped_into 'root' }
+      its(:content) do
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           # !!! Managed by Puppet !!!
 
           ldap_auth_method: bind
@@ -216,26 +245,26 @@ describe 'sasl::authd' do
           ldap_servers: ldap://#{default.ip}
           ldap_start_tls: no
         EOS
-      }
+      end
     end
 
     # Debian Squeeze doesn't support 'service saslauthd status'
-    describe service('saslauthd'), :unless => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_enabled }
-      it { should be_running }
+    describe service('saslauthd'), unless: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_enabled }
+      it { is_expected.to be_running }
     end
 
-    describe service('saslauthd'), :if => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_enabled }
+    describe service('saslauthd'), if: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_enabled }
     end
 
-    describe process('saslauthd'), :if => fact('operatingsystem').eql?('Debian') and fact('operatingsystemmajrelease').eql?('6') do
-      it { should be_running }
+    describe process('saslauthd'), if: fact('operatingsystem').eql?('Debian') && fact('operatingsystemmajrelease').eql?('6') do
+      it { is_expected.to be_running }
     end
 
-    describe command("testsaslauthd -u alice -p password") do
-      its(:stdout) { should match /^0: OK "Success."/ }
-      its(:exit_status) { should eq 0 }
+    describe command('testsaslauthd -u alice -p password') do
+      its(:stdout) { is_expected.to match %r{^0: OK "Success."} }
+      its(:exit_status) { is_expected.to eq 0 }
     end
   end
 end

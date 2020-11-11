@@ -121,16 +121,16 @@ class sasl::authd (
   Optional[Integer[2, 3]]                             $ldap_version            = undef,
   # rimap
   Optional[SASL::HostPort]                            $imap_server             = undef,
-) inherits ::sasl::params {
+) inherits sasl::params {
 
-  if ! defined(Class['::sasl']) {
+  if ! defined(Class['sasl']) {
     fail('You must include the sasl base class before using the sasl::authd class')
   }
 
-  contain ::sasl::authd::install
-  contain ::sasl::authd::config
-  contain ::sasl::authd::service
+  contain sasl::authd::install
+  contain sasl::authd::config
+  contain sasl::authd::service
 
-  Class['::sasl::authd::install'] -> Class['::sasl::authd::config']
-    ~> Class['::sasl::authd::service']
+  Class['sasl::authd::install'] -> Class['sasl::authd::config']
+    ~> Class['sasl::authd::service']
 }

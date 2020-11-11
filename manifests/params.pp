@@ -1,13 +1,14 @@
 # @!visibility private
 class sasl::params {
 
+  $saslauthd_hasstatus      = true
   $saslauthd_service        = 'saslauthd'
   $saslauthd_ldap_conf_file = '/etc/saslauthd.conf'
   $saslauthd_threads        = 5
   $saslauthd_caching        = false
   $saslauthd_combine_realm  = false
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       $package_name          = 'cyrus-sasl-lib'
       $application_directory = '/etc/sasl2'
@@ -26,11 +27,10 @@ class sasl::params {
         'plain'      => 'cyrus-sasl-plain',
       }
       $saslauthd_package     = 'cyrus-sasl'
-      $saslauthd_socket      = $::operatingsystemmajrelease ? {
+      $saslauthd_socket      = $facts['os']['release']['major'] ? {
         '6'     => '/var/run/saslauthd',
         default => '/run/saslauthd',
       }
-      $saslauthd_hasstatus   = true
     }
     'Debian': {
       $package_name          = 'libsasl2-2'
@@ -47,9 +47,9 @@ class sasl::params {
       $saslauthd_package     = 'sasl2-bin'
       $saslauthd_socket      = '/var/run/saslauthd'
 
-      case $::operatingsystem {
+      case $facts['os']['name'] {
         'Ubuntu': {
-          case $::operatingsystemrelease {
+          case $facts['os']['release']['full'] {
             '14.04': {
               $auxprop_packages = {
                 'ldapdb' => 'libsasl2-modules-ldap',
@@ -65,19 +65,8 @@ class sasl::params {
               }
             }
           }
-
-          $saslauthd_hasstatus = true
         }
         default: {
-          case $::operatingsystemmajrelease {
-            '6': {
-              $saslauthd_hasstatus = false
-            }
-            default: {
-              $saslauthd_hasstatus = true
-            }
-          }
-
           $auxprop_packages = {
             'ldapdb' => 'libsasl2-modules-ldap',
             'sasldb' => 'libsasl2-modules',
@@ -87,7 +76,7 @@ class sasl::params {
       }
     }
     default: {
-      fail("The ${module_name} module is not supported on an ${::osfamily} based system.")
+      fail("The ${module_name} module is not supported on an ${facts['os']['family']} based system.")
     }
   }
 }

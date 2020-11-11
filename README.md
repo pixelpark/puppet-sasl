@@ -1,11 +1,10 @@
 # sasl
 
-Tested with Travis CI
-
 [![Build Status](https://travis-ci.org/bodgit/puppet-sasl.svg?branch=master)](https://travis-ci.org/bodgit/puppet-sasl)
-[![Coverage Status](https://coveralls.io/repos/bodgit/puppet-sasl/badge.svg?branch=master&service=github)](https://coveralls.io/github/bodgit/puppet-sasl?branch=master)
-[![Puppet Forge](http://img.shields.io/puppetforge/v/bodgit/sasl.svg)](https://forge.puppetlabs.com/bodgit/sasl)
-[![Dependency Status](https://gemnasium.com/bodgit/puppet-sasl.svg)](https://gemnasium.com/bodgit/puppet-sasl)
+[![Codecov](https://img.shields.io/codecov/c/github/bodgit/puppet-sasl)](https://codecov.io/gh/bodgit/puppet-sasl)
+[![Puppet Forge version](http://img.shields.io/puppetforge/v/bodgit/sasl)](https://forge.puppetlabs.com/bodgit/sasl)
+[![Puppet Forge downloads](https://img.shields.io/puppetforge/dt/bodgit/sasl)](https://forge.puppetlabs.com/bodgit/sasl)
+[![Puppet Forge - PDK version](https://img.shields.io/puppetforge/pdk-version/bodgit/sasl)](https://forge.puppetlabs.com/bodgit/sasl)
 
 #### Table of Contents
 
@@ -81,26 +80,28 @@ class { '::sasl::authd':
 The reference documentation is generated with
 [puppet-strings](https://github.com/puppetlabs/puppet-strings) and the latest
 version of the documentation is hosted at
-[https://bodgit.github.io/puppet-sasl/](https://bodgit.github.io/puppet-sasl/).
+[https://bodgit.github.io/puppet-sasl/](https://bodgit.github.io/puppet-sasl/)
+and available also in the [REFERENCE.md](https://github.com/bodgit/puppet-sasl/blob/master/REFERENCE.md).
 
 ## Limitations
 
-This module has been built on and tested against Puppet 4.4.0 and higher.
+This module has been built on and tested against Puppet 5 and higher.
 
 The module has been tested on:
 
 * RedHat Enterprise Linux 6/7
-* Ubuntu 12.04/14.04/16.04
-* Debian 6/7/8
+* Ubuntu 14.04/16.04
+* Debian 8
 
 ## Development
 
-The module has both [rspec-puppet](http://rspec-puppet.com) and
+The module relies on [PDK](https://puppet.com/docs/pdk/1.x/pdk.html) and has
+both [rspec-puppet](http://rspec-puppet.com) and
 [beaker-rspec](https://github.com/puppetlabs/beaker-rspec) tests. Run them
 with:
 
 ```
-$ bundle exec rake test
+$ bundle exec rake spec
 $ PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=x.y.z bundle exec rake beaker:<nodeset>
 ```
 

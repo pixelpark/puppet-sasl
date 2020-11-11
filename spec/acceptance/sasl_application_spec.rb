@@ -1,6 +1,7 @@
 require 'spec_helper_acceptance'
 
 describe 'sasl::application' do
+  # rubocop:disable ConditionalAssignment
   case fact('osfamily')
   when 'RedHat'
     plain_package_name  = 'cyrus-sasl-plain'
@@ -24,10 +25,10 @@ describe 'sasl::application' do
       sasldb_package_name = 'libsasl2-modules'
     end
   end
+  # rubocop:enable ConditionalAssignment
 
   context 'with saslauthd method and plain mechanisms' do
-
-    it 'should work with no errors' do
+    it 'works with no errors' do
       pp = <<-EOS
         include ::sasl
         class { '::sasl::authd':
@@ -39,14 +40,14 @@ describe 'sasl::application' do
         }
       EOS
 
-      apply_manifest(pp, :catch_failures => true)
-      apply_manifest(pp, :catch_changes  => true)
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes:  true)
     end
 
     describe file(application_file) do
-      it { should be_file }
+      it { is_expected.to be_file }
       its(:content) do
-        should eq <<-EOS.gsub(/^ +/, '')
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           pwcheck_method: saslauthd
           mech_list: plain login
         EOS
@@ -54,13 +55,12 @@ describe 'sasl::application' do
     end
 
     describe package(plain_package_name) do
-      it { should be_installed }
+      it { is_expected.to be_installed }
     end
   end
 
   context 'with sasldb method and md5 mechanisms' do
-
-    it 'should work with no errors' do
+    it 'works with no errors' do
       pp = <<-EOS
         include ::sasl
         ::sasl::application { 'test':
@@ -70,14 +70,14 @@ describe 'sasl::application' do
         }
       EOS
 
-      apply_manifest(pp, :catch_failures => true)
-      apply_manifest(pp, :catch_changes  => true)
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes:  true)
     end
 
     describe file(application_file) do
-      it { should be_file }
+      it { is_expected.to be_file }
       its(:content) do
-        should eq <<-EOS.gsub(/^ +/, '')
+        is_expected.to eq <<-EOS.gsub(%r{^ +}, '')
           pwcheck_method: auxprop
           mech_list: digest-md5 cram-md5
           auxprop_plugin: sasldb
@@ -86,11 +86,11 @@ describe 'sasl::application' do
     end
 
     describe package(md5_package_name) do
-      it { should be_installed }
+      it { is_expected.to be_installed }
     end
 
     describe package(sasldb_package_name) do
-      it { should be_installed }
+      it { is_expected.to be_installed }
     end
   end
 end

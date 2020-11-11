@@ -15,7 +15,7 @@ class sasl::config {
   # Debian/Ubuntu drop two files in the application directory to help with
   # migrating `sasldb` between versions of BerkeleyDB so stop them from being
   # purged away
-  if $::osfamily == 'Debian' {
+  if $facts['os']['family'] == 'Debian' {
     file { "${application_directory}/berkeley_db.active":
       ensure => file,
       owner  => 0,

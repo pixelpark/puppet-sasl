@@ -1,4 +1,10 @@
 fixtures:
   symlinks:
     sasl: "#{source_dir}"
-    test: "#{source_dir}/spec/fixtures/test"
+  forge_modules:
+    bodgitlib:
+      repo: "bodgit/bodgitlib"
+      ref: "3.0.0"
+    stdlib:
+      repo: "puppetlabs/stdlib"
+      ref: "6.5.0"

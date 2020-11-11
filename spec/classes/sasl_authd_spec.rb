@@ -1,23 +1,24 @@
 require 'spec_helper'
 
 shared_examples_for 'sasl::authd' do
-  it { should contain_class('sasl::authd') }
-  it { should contain_class('sasl::authd::config') }
-  it { should contain_class('sasl::authd::install') }
-  it { should contain_class('sasl::authd::service') }
-  it { should contain_service('saslauthd') }
+  it { is_expected.to contain_class('sasl::authd') }
+  it { is_expected.to contain_class('sasl::authd::config') }
+  it { is_expected.to contain_class('sasl::authd::install') }
+  it { is_expected.to contain_class('sasl::authd::service') }
+  it { is_expected.to contain_service('saslauthd') }
 end
 
 describe 'sasl::authd' do
-
   context 'on unsupported distributions' do
     let(:facts) do
       {
-        :osfamily => 'Unsupported'
+        os: {
+          family: 'Unsupported',
+        },
       }
     end
 
-    it { expect { should compile }.to raise_error(/not supported on an Unsupported/) }
+    it { is_expected.to compile.and_raise_error(%r{not supported on an Unsupported}) }
   end
 
   on_supported_os.each do |os, facts|
@@ -34,27 +35,25 @@ describe 'sasl::authd' do
         context "with #{threads} threads" do
           let(:params) do
             {
-              :threads => threads
+              threads: threads,
             }
           end
 
-          context "with pam mechanism", :compile do
+          context 'with pam mechanism', :compile do
             let(:params) do
               super().merge(
-                {
-                  :mechanism => 'pam'
-                }
+                mechanism: 'pam',
               )
             end
 
             it_behaves_like 'sasl::authd'
 
-            it { should contain_file('/etc/saslauthd.conf').with_ensure('absent') }
+            it { is_expected.to contain_file('/etc/saslauthd.conf').with_ensure('absent') }
 
             case facts[:osfamily]
             when 'Debian'
               it do
-                should contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                is_expected.to contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                   # !!! Managed by Puppet !!!
 
                   START=yes
@@ -66,19 +65,19 @@ describe 'sasl::authd' do
                   OPTIONS="-c -m /var/run/saslauthd"
                 EOS
               end
-              it { should contain_package('sasl2-bin') }
+              it { is_expected.to contain_package('sasl2-bin') }
             when 'RedHat'
               socketdir = case facts[:operatingsystemmajrelease]
-              when '6'
-                '/var/run/saslauthd'
-              else
-                '/run/saslauthd'
-              end
+                          when '6'
+                            '/var/run/saslauthd'
+                          else
+                            '/run/saslauthd'
+                          end
 
               case threads
               when 5
                 it do
-                  should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     SOCKETDIR="#{socketdir}"
@@ -88,7 +87,7 @@ describe 'sasl::authd' do
                 end
               else
                 it do
-                  should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     SOCKETDIR="#{socketdir}"
@@ -98,16 +97,14 @@ describe 'sasl::authd' do
                 end
               end
 
-              it { should contain_package('cyrus-sasl') }
+              it { is_expected.to contain_package('cyrus-sasl') }
             end
           end
 
-          context "with ldap mechanism" do
+          context 'with ldap mechanism' do
             let(:params) do
               super().merge(
-                {
-                  :mechanism => 'ldap'
-                }
+                mechanism: 'ldap',
               )
             end
 
@@ -115,7 +112,7 @@ describe 'sasl::authd' do
               it_behaves_like 'sasl::authd'
 
               it do
-                should contain_file('/etc/saslauthd.conf').with_content(<<-EOS.gsub(/^ +/, ''))
+                is_expected.to contain_file('/etc/saslauthd.conf').with_content(<<-EOS.gsub(%r{^ +}, ''))
                   # !!! Managed by Puppet !!!
 
                 EOS
@@ -124,7 +121,7 @@ describe 'sasl::authd' do
               case facts[:osfamily]
               when 'Debian'
                 it do
-                  should contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     START=yes
@@ -136,19 +133,19 @@ describe 'sasl::authd' do
                     OPTIONS="-c -m /var/run/saslauthd"
                   EOS
                 end
-                it { should contain_package('sasl2-bin') }
+                it { is_expected.to contain_package('sasl2-bin') }
               when 'RedHat'
                 socketdir = case facts[:operatingsystemmajrelease]
-                when '6'
-                  '/var/run/saslauthd'
-                else
-                  '/run/saslauthd'
-                end
+                            when '6'
+                              '/var/run/saslauthd'
+                            else
+                              '/run/saslauthd'
+                            end
 
                 case threads
                 when 5
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -158,7 +155,7 @@ describe 'sasl::authd' do
                   end
                 else
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -168,25 +165,23 @@ describe 'sasl::authd' do
                   end
                 end
 
-                it { should contain_package('cyrus-sasl') }
+                it { is_expected.to contain_package('cyrus-sasl') }
               end
             end
 
             context 'with alternate configuration file and specified parameters', :compile do
               let(:params) do
                 super().merge(
-                  {
-                    :ldap_conf_file => '/tmp/saslauthd.conf'
-                    # TODO
-                  }
+                  ldap_conf_file: '/tmp/saslauthd.conf',
+                  # TODO
                 )
               end
 
               it_behaves_like 'sasl::authd'
 
-              it { should_not contain_file('/etc/saslauthd.conf') }
+              it { is_expected.not_to contain_file('/etc/saslauthd.conf') }
               it do
-                should contain_file('/tmp/saslauthd.conf').with_content(<<-EOS.gsub(/^ +/, ''))
+                is_expected.to contain_file('/tmp/saslauthd.conf').with_content(<<-EOS.gsub(%r{^ +}, ''))
                   # !!! Managed by Puppet !!!
 
                 EOS
@@ -195,7 +190,7 @@ describe 'sasl::authd' do
               case facts[:osfamily]
               when 'Debian'
                 it do
-                  should contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     START=yes
@@ -207,19 +202,19 @@ describe 'sasl::authd' do
                     OPTIONS="-c -m /var/run/saslauthd"
                   EOS
                 end
-                it { should contain_package('sasl2-bin') }
+                it { is_expected.to contain_package('sasl2-bin') }
               when 'RedHat'
                 socketdir = case facts[:operatingsystemmajrelease]
-                when '6'
-                  '/var/run/saslauthd'
-                else
-                  '/run/saslauthd'
-                end
+                            when '6'
+                              '/var/run/saslauthd'
+                            else
+                              '/run/saslauthd'
+                            end
 
                 case threads
                 when 5
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -229,7 +224,7 @@ describe 'sasl::authd' do
                   end
                 else
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -239,7 +234,7 @@ describe 'sasl::authd' do
                   end
                 end
 
-                it { should contain_package('cyrus-sasl') }
+                it { is_expected.to contain_package('cyrus-sasl') }
               end
             end
           end
@@ -247,29 +242,25 @@ describe 'sasl::authd' do
           context 'with rimap method' do
             let(:params) do
               super().merge(
-                {
-                  :mechanism => 'rimap',
-                }
+                mechanism: 'rimap',
               )
             end
 
             context 'with just a hostname', :compile do
               let(:params) do
                 super().merge(
-                  {
-                    :imap_server => 'imap.example.com',
-                  }
+                  imap_server: 'imap.example.com',
                 )
               end
 
               it_behaves_like 'sasl::authd'
 
-              it { should contain_file('/etc/saslauthd.conf').with_ensure('absent') }
+              it { is_expected.to contain_file('/etc/saslauthd.conf').with_ensure('absent') }
 
               case facts[:osfamily]
               when 'Debian'
                 it do
-                  should contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     START=yes
@@ -281,19 +272,19 @@ describe 'sasl::authd' do
                     OPTIONS="-c -m /var/run/saslauthd"
                   EOS
                 end
-                it { should contain_package('sasl2-bin') }
+                it { is_expected.to contain_package('sasl2-bin') }
               when 'RedHat'
                 socketdir = case facts[:operatingsystemmajrelease]
-                when '6'
-                  '/var/run/saslauthd'
-                else
-                  '/run/saslauthd'
-                end
+                            when '6'
+                              '/var/run/saslauthd'
+                            else
+                              '/run/saslauthd'
+                            end
 
                 case threads
                 when 5
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -303,7 +294,7 @@ describe 'sasl::authd' do
                   end
                 else
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -313,27 +304,25 @@ describe 'sasl::authd' do
                   end
                 end
 
-                it { should contain_package('cyrus-sasl') }
+                it { is_expected.to contain_package('cyrus-sasl') }
               end
             end
 
             context 'with a hostname and port', :compile do
               let(:params) do
                 super().merge(
-                  {
-                    :imap_server => ['imap.example.com', 993],
-                  }
+                  imap_server: ['imap.example.com', 993],
                 )
               end
 
               it_behaves_like 'sasl::authd'
 
-              it { should contain_file('/etc/saslauthd.conf').with_ensure('absent') }
+              it { is_expected.to contain_file('/etc/saslauthd.conf').with_ensure('absent') }
 
               case facts[:osfamily]
               when 'Debian'
                 it do
-                  should contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                  is_expected.to contain_file('/etc/default/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                     # !!! Managed by Puppet !!!
 
                     START=yes
@@ -345,19 +334,19 @@ describe 'sasl::authd' do
                     OPTIONS="-c -m /var/run/saslauthd"
                   EOS
                 end
-                it { should contain_package('sasl2-bin') }
+                it { is_expected.to contain_package('sasl2-bin') }
               when 'RedHat'
                 socketdir = case facts[:operatingsystemmajrelease]
-                when '6'
-                  '/var/run/saslauthd'
-                else
-                  '/run/saslauthd'
-                end
+                            when '6'
+                              '/var/run/saslauthd'
+                            else
+                              '/run/saslauthd'
+                            end
 
                 case threads
                 when 5
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -367,7 +356,7 @@ describe 'sasl::authd' do
                   end
                 else
                   it do
-                    should contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(/^ +/, ''))
+                    is_expected.to contain_file('/etc/sysconfig/saslauthd').with_content(<<-EOS.gsub(%r{^ +}, ''))
                       # !!! Managed by Puppet !!!
 
                       SOCKETDIR="#{socketdir}"
@@ -377,7 +366,7 @@ describe 'sasl::authd' do
                   end
                 end
 
-                it { should contain_package('cyrus-sasl') }
+                it { is_expected.to contain_package('cyrus-sasl') }
               end
             end
           end

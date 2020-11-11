@@ -10,20 +10,20 @@ describe 'sasl' do
     application_directory = '/usr/lib/sasl2'
   end
 
-  it 'should work with no errors' do
+  it 'works with no errors' do
     pp = <<-EOS
       include ::sasl
     EOS
 
-    apply_manifest(pp, :catch_failures => true)
-    apply_manifest(pp, :catch_changes  => true)
+    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_changes: true)
   end
 
   describe file(application_directory) do
-    it { should be_directory }
+    it { is_expected.to be_directory }
   end
 
   describe package(package_name) do
-    it { should be_installed }
+    it { is_expected.to be_installed }
   end
 end

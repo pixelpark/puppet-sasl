@@ -1,37 +1,40 @@
 require 'spec_helper'
 
 describe 'sasl' do
-
   context 'on unsupported distributions' do
     let(:facts) do
       {
-        :osfamily => 'Unsupported'
+        os: {
+          family: 'Unsupported',
+        },
       }
     end
 
-    it { expect { should compile }.to raise_error(/not supported on an Unsupported/) }
+    it { is_expected.to compile.and_raise_error(%r{not supported on an Unsupported}) }
   end
 
   on_supported_os.each do |os, facts|
-    context "on #{os}", :compile do
+    context "on #{os}" do
       let(:facts) do
         facts
       end
 
-      it { should contain_class('sasl') }
-      it { should contain_class('sasl::config') }
-      it { should contain_class('sasl::install') }
-      it { should contain_class('sasl::params') }
+      it { is_expected.to compile.with_all_deps }
+
+      it { is_expected.to contain_class('sasl') }
+      it { is_expected.to contain_class('sasl::config') }
+      it { is_expected.to contain_class('sasl::install') }
+      it { is_expected.to contain_class('sasl::params') }
 
       case facts[:osfamily]
       when 'Debian'
-        it { should contain_file('/usr/lib/sasl2') }
-        it { should contain_file('/usr/lib/sasl2/berkeley_db.active') }
-        it { should contain_file('/usr/lib/sasl2/berkeley_db.txt') }
-        it { should contain_package('libsasl2-2') }
+        it { is_expected.to contain_file('/usr/lib/sasl2') }
+        it { is_expected.to contain_file('/usr/lib/sasl2/berkeley_db.active') }
+        it { is_expected.to contain_file('/usr/lib/sasl2/berkeley_db.txt') }
+        it { is_expected.to contain_package('libsasl2-2') }
       when 'RedHat'
-        it { should contain_file('/etc/sasl2') }
-        it { should contain_package('cyrus-sasl-lib') }
+        it { is_expected.to contain_file('/etc/sasl2') }
+        it { is_expected.to contain_package('cyrus-sasl-lib') }
       end
     end
   end

@@ -74,7 +74,7 @@ define sasl::application (
   Optional[Boolean]                                $sql_usessl      = undef,
 ) {
 
-  if ! defined(Class['::sasl']) {
+  if ! defined(Class['sasl']) {
     fail('You must include the sasl base class before using any sasl defined resources')
   }
 
@@ -96,10 +96,10 @@ define sasl::application (
     }
     'saslauthd': {
       # Require saslauthd if that's the method
-      if ! defined(Class['::sasl::authd']) {
+      if ! defined(Class['sasl::authd']) {
         fail('You must include the sasl::authd class before using any sasl defined resources')
       }
-      Class['::sasl::authd'] -> File[$service_file]
+      Class['sasl::authd'] -> File[$service_file]
     }
     default: {
       # noop
