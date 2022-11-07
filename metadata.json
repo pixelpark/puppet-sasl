@@ -1,6 +1,6 @@
 {
   "name": "bodgit-sasl",
-  "version": "3.0.0.1",
+  "version": "3.0.0+dpx1",
   "author": "bodgit",
   "summary": "Puppet Module for managing Cyrus SASL",
   "license": "Apache-2.0",
@@ -22,14 +22,16 @@
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
         "6",
-        "7"
+        "7",
+        "8"
       ]
     },
     {
